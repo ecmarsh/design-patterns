@@ -105,20 +105,20 @@ class Workspace {
     this.req = this.createReq()
   }
 
-  public install(): string {
-    return this.req.mgr + ' ' + this.command.install
-  }
-
-  public run(): string {
-    return this.command.run + ' ' + this.entry.fileName
-  }
-
   public createEntry(): Entry {
     return this.factory.createEntry()
   }
 
   public createReq(): Req {
     return this.factory.createReq()
+  }
+
+  public install(): string {
+    return this.req.mgr + ' ' + this.command.install
+  }
+
+  public run(): string {
+    return this.command.run + ' ' + this.entry.fileName
   }
 }
 

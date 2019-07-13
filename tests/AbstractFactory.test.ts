@@ -6,19 +6,17 @@ describe('Abstract Factory', () => {
   let pyWorkspace: Workspace
 
   test('Initialization', () => {
-    jsWorkspace = new Workspace(new JSFactory())
-    pyWorkspace = new Workspace(new PyFactory())
+    const workspaces = [jsWorkspace, pyWorkspace,]
+      = [new Workspace(new JSFactory()), new Workspace(new PyFactory()),]
 
-    const expectPropsIn = (__Workspace: Workspace) => {
-      const factoryProps = ['factory', 'entry', 'command', 'req']
-      factoryProps.forEach(prop => expect(__Workspace).toHaveProperty(prop))
-    }
-
-    expectPropsIn(jsWorkspace)
-    expectPropsIn(pyWorkspace)
+    workspaces.forEach(workspace => {
+      for (const prop of ['entry', 'command', 'req']) {
+        expect(workspace).toHaveProperty(prop)
+      }
+    })
   })
 
-  test('Created products specific to factory', () => {
+  test('Creates products specific to factory', () => {
     expect(jsWorkspace.createEntry())
       .toMatchObject({
         fileName: 'index.js'
@@ -40,7 +38,7 @@ describe('Abstract Factory', () => {
 
   test('Install', () => {
     expect(jsWorkspace.install()).toMatch('npm install')
-    expect(pyWorkspace.install()).toMatch('pip -r install requirements.txt')
+    expect(pyWorkspace.install()).toMatch(/^pip.+requirements.txt$/)
   })
 
   test('Run', () => {
