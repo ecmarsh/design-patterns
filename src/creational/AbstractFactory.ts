@@ -101,8 +101,8 @@ class Workspace {
 
   constructor(public factory: WorkspaceFactory) {
     this.command = factory.command
-    this.entry = factory.createEntry()
-    this.req = factory.createReq()
+    this.entry = this.createEntry()
+    this.req = this.createReq()
   }
 
   public install(): string {
@@ -111,6 +111,14 @@ class Workspace {
 
   public run(): string {
     return this.command.run + ' ' + this.entry.fileName
+  }
+
+  public createEntry(): Entry {
+    return this.factory.createEntry()
+  }
+
+  public createReq(): Req {
+    return this.factory.createReq()
   }
 }
 
