@@ -39,7 +39,7 @@ interface AttrDescriptor {
 // by implementing the Builder interface
 // Defines and tracks representation it creates
 // Provides interface for retrieving product
-class TitleBuilder {
+class TitleBuilder implements ElementBuilder {
   private element: string = ''
   private size: number = 1
 
