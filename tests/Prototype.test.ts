@@ -1,52 +1,80 @@
-import { installGit } from '../src/creational'
+import { git } from '../src/creational'
+
+let remote: string
+
+beforeEach(() => setupGit())
+afterEach(() => resetGit())
+
 
 describe('Prototype', () => {
-  const git = installGit('user')
 
-  test('Example driver', () => {
-    expect(git.author).toBe('user')
-    expect(git.repoCnt).toEqual(2)
+  test('Setup', () => {
+    expect(git.user).toBe('user')
+    expect(git.repos.has(remote)).toBe(true)
   })
 
-  test('Clone via manager', () => {
-    const remote = 'https://github.com/facebook/react/'
+  test('Manager does cloning', () => {
     const clone = git.clone(remote)
-    expect(git.repoCnt).toEqual(3)
+    expect(Object.is(clone, remote)).toBe(false)
     expect(clone).toMatchObject({
       name: 'react',
       author: 'user',
-      clone: expect.anything()
+      clone: expect.anything() // Implements clonable
     })
   })
 
-  test('Clones itself', () => {
-    const remote = 'https://github.com/reduxjs/redux/'
-    const redux = git.repos.get(remote)
-    const fork = redux.clone()
 
-    expect(fork === redux).toBe(false)
+  test('Repo clones itself', () => {
+    const repo = git.repos.get(remote)
+    const clone = repo.clone()
 
-    const { name, author, files } = redux
-    expect(fork).toMatchObject({ name, author, files })
+    // Should be different refs
+    expect(clone === repo).toBe(false)
+
+    // But primitive props should be equal
+    const { name, author, files } = repo
+    expect(clone).toMatchObject({ name, author, files })
   })
 
+
   test('Updating prototype no side effects', () => {
-    const remote = 'https://github.com/facebook/react/'
+    const update = git.clone(remote)
 
-    const reactNative = git.clone(remote)
-    reactNative.name = 'react-native'
-    reactNative.files.push('native.js')
-    git.push(reactNative)
-    expect(git.repoCnt).toEqual(4)
+    // Make some changes to clone
+    update.name = 'react-native'
+    update.files.push('native.js')
 
-    const original = git.clone(remote)
-    expect(original).toHaveProperty('name', 'react')
-    expect(original.files).not.toContain('native.js')
+    // Update the prototype mgr registry
+    git.push(update)
 
-    const rNative = git.clone(reactNative.remote())
-    expect(rNative).toMatchObject({
+    // Changes should persist from remote
+    const updateFromRemote = git.clone(update.remote())
+    expect(updateFromRemote).toMatchObject({
       name: 'react-native',
       files: expect.arrayContaining(['native.js'])
     })
+
+    // Original should be unchanged
+    const original = git.clone(remote)
+    expect(original).toHaveProperty('name', 'react')
+    expect(original.files).not.toContain('native.js')
   })
+
 })
+
+
+/* Setup and Teardown */
+
+function setupGit() {
+  git.install('user')
+  const repo = git.createRepo({
+    name: 'react',
+    author: 'facebook',
+    files: ['index.js', 'hooks.js', 'docs'],
+  })
+  remote = repo.remote()
+}
+
+function resetGit() {
+  git.reset()
+}
