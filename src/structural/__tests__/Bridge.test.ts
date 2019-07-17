@@ -3,7 +3,8 @@ import {
   Payment, // Abstraction
   LatePayment, // Refined Abstraction
   CarPayment, // Concrete1
-  Mortgage // Concrete2
+  Mortgage, // Concrete2
+  getRate, // Concrete shared helper
 } from '../Bridge'
 
 
@@ -13,6 +14,13 @@ let mortgage: Mortgage
 beforeEach(() => setupTestUtils())
 
 describe('Bridge', () => {
+  test('Get rate', () => {
+    expect(getRate(800)).toEqual(2)
+    expect(getRate(700)).toEqual(3)
+    expect(getRate(600)).toEqual(4)
+    expect(getRate(500)).toEqual(5)
+  })
+
   test('Concrete 2 - Car Payment', () => {
     expect(carPayment.getRate()).toEqual(5)
     expect(carPayment.getPeriods()).toEqual(car().periodsMonths)

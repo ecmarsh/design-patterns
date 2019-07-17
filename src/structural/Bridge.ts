@@ -111,8 +111,7 @@ function getRate(creditScore: number) {
     case 800: return 2
     case 700: return 3
     case 600: return 4
-    case 500: return 5
-    default: return 6
+    default: return 5
   }
 }
 
@@ -129,4 +128,4 @@ class Bank implements Client {
 }
 
 
-export { Bank, Payment, LatePayment, CarPayment, Mortgage }
+export { Bank, Payment, LatePayment, CarPayment, Mortgage, getRate }
