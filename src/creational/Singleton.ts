@@ -21,11 +21,14 @@
  * and allow the Singleton class to register their instance in the registry.
  */
 
-// SINGLETON
-// Defines an instance operation that lets
-// clients access its unique instance.
-// Instance is a static class method and may be
-// responsible for creating its own unique instance.
+
+/**
+ * **Singleton:**
+ * Defines an instance operation that lets
+ * clients access its unique instance.
+ * Instance is a static class method and may be
+ * responsible for creating its own unique instance.
+ */
 class Database {
   private static instance: Database | null = null
 
@@ -37,11 +40,11 @@ class Database {
     return Database.instance
   }
 
-  // Testing
+  /** Check if Singleton exists. Mainly for testing. */
   public static isInitialized = () =>
     Database.instance != null
 
-  // Testing
+  /** Setup or teardown method. */
   public static clean = () =>
     Database.instance = null
 
@@ -51,7 +54,7 @@ class Database {
     }
   }
 
-  // Allow extension, but control instances
+  /** Extension is allowed, **no** instances */
   protected constructor(private config: object) { }
 
   private _data: { [key: string]: any[] } = {
@@ -61,5 +64,6 @@ class Database {
     ]
   }
 }
+
 
 export { Database }

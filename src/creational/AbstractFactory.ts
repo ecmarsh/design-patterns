@@ -17,20 +17,24 @@
  *
  */
 
-// Abstract factory is implemented by the Factory Method
 
-// ABSTRACT FACTORY
-// Declares an interface for operations
-// that create abstract product objects.
+/**
+ * **Abstract Factory:**
+ * Declares an interface for operations
+ * that create abstract product objects.
+ */
 interface WorkspaceFactory {
   command: Command
   createEntry(): Entry
   createReq(): Req
 }
 
-// CONCRETE FACTORY
-// Implements operations to create
-// concrete product objects.
+
+/**
+ * **Concrete Factories:**
+ * Implements operations to create
+ * concrete product objects.
+ */
 class JSFactory implements WorkspaceFactory {
   public command: Command = new JSCommand()
   public createEntry = (): Entry => new JSEntry()
@@ -43,9 +47,12 @@ class PyFactory implements WorkspaceFactory {
   public createReq = (): Req => new PyReq()
 }
 
-// ABSTRACT PRODUCTS
-// Declares interface for
-// a type of product object.
+
+/**
+ * **Abstract Products:**
+ * Declares interface for
+ * a type of product object.
+ */
 interface Req {
   file: string
   mgr: string
@@ -60,9 +67,12 @@ interface Command {
   run: string
 }
 
-// CONCRETE PRODUCT
-// Defines a product object to be created
-// by the corresponding concrete factory.
+
+/**
+ * **Concrete Products:**
+ * Defines a product object to be created
+ * by the corresponding concrete factory.
+ */
 class JSReq implements Req {
   public file = 'package.json'
   public mgr = 'npm'
@@ -91,9 +101,12 @@ class PyCommand implements Command {
   public run = 'python'
 }
 
-// Client
-// Uses only interfaces declared by Abstract
-// Factory and Abstract Product classes.
+
+/**
+ * _Client_
+ * Uses only interfaces declared by Abstract
+ * Factory and Abstract Product classes.
+ */
 class Workspace {
   private command: Command
   private entry: Entry
@@ -122,5 +135,5 @@ class Workspace {
   }
 }
 
-// Export Client + Concretes for Tests
+
 export { Workspace, PyFactory, JSFactory }

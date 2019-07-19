@@ -18,17 +18,23 @@
  *
  */
 
-// PRODUCT
-// Defines the interface of objects
-// that the factory method creates.
+
+/**
+ * **Product:**
+ * Defines the interface of objects
+ * that the factory method creates.
+ */
 interface Doc {
   ext: string
   name: string
   open(): string
 }
 
-// CONCRETE PRODUCTS
-// Implements the Product interface.
+
+/**
+ * **Concrete Products:**
+ * Implements the Product interface.
+ */
 class WordDoc implements Doc {
   public ext: string = `.docx`
   public name: string = `Document1${this.ext}`
@@ -42,9 +48,11 @@ class PagesDoc implements Doc {
 }
 
 
-// CREATOR
-// Declares factory method that returns
-// an object of type Product.
+/**
+ * **Creator:**
+ * Declares factory method that returns
+ * an object of type Product.
+ */
 abstract class TextEditor {
   // The factory method that does not know
   // what specific type of 'Doc' is yet
@@ -65,9 +73,11 @@ abstract class TextEditor {
 }
 
 
-// CONCRETE CREATORS
-// Overrides the factory method to
-// return an instance of a Concrete Product.
+/**
+ * **Concrete Creators:**
+ * Overrides the factory method to
+ * return an instance of a Concrete Product.
+ */
 class Word extends TextEditor {
   protected createDoc() {
     return new WordDoc()
@@ -79,5 +89,6 @@ class Pages extends TextEditor {
     return new PagesDoc()
   }
 }
+
 
 export { Word, Pages }

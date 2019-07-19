@@ -22,15 +22,21 @@
  *
  */
 
-// PROTOTYPE<I>
-// Declares an interface for cloning itself
+
+/**
+ * **Prototype:**
+ * Declares an interface for cloning itself.
+ */
 interface Clonable {
   clone(): this
   [key: string]: any
 }
 
-// CONCRETE PROTOTYPE
-// Implements an operation for cloning itself
+
+/**
+ * **Concrete Prototype:**
+ * Implements an operation for cloning itself.
+ */
 const repository: Clonable = {
   name: '',
   author: '',
@@ -49,7 +55,7 @@ const repository: Clonable = {
     Object.assign(prototype, this)
 
     // Have to deep-copy non-primitive
-    // one of the considerations with cloning
+    // One of the considerations with cloning
     prototype.files = [...this.files]
 
     return prototype
@@ -57,8 +63,10 @@ const repository: Clonable = {
 }
 
 
-// Optional "prototype manager"
-// keeps track of available prototypes
+/**
+ * _[Prototype Manager]_
+ * Associative store of available prototypes.
+ */
 const git = {
   repos: new Map(),
   user: 'N/A',
@@ -95,8 +103,12 @@ const git = {
   }
 }
 
-// Client can create a new object by asking
-// a prototype to clone itself rather
-// than depending on the parent class
+
+/**
+ * _Client_ can create a new object by asking
+ * a prototype to clone itself rather
+ * than depending on the parent class
+ */
+
 
 export { git }

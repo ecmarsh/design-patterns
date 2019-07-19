@@ -15,9 +15,11 @@
  */
 
 
-// BUILDER
-// Specifies an abstact interface
-// for creating parts of a Product object
+/**
+ * **Builder:**
+ * Specifies an abstact interface
+ * for creating parts of a Product object
+ */
 interface ElementBuilder {
   startElement(...args: any[]): void
   addAttribute(descriptor: AttrDescriptor): void
@@ -26,19 +28,19 @@ interface ElementBuilder {
   reset(): void
 }
 
-// Just a helper for the example
-// nothing specific to pattern
 interface AttrDescriptor {
   attr: string
   val: string
 }
 
 
-// CONCRETE BUILDERS
-// Constructs and assembles parts of product
-// by implementing the Builder interface
-// Defines and tracks representation it creates
-// Provides interface for retrieving product
+/**
+ * **Concrete Builder:**
+ * Constructs and assembles parts of product
+ * by implementing the Builder interface
+ * Defines and tracks representation it creates
+ * Provides interface for retrieving product
+ */
 class TitleBuilder implements ElementBuilder {
   private element: string = ''
   private size: number = 1
@@ -75,8 +77,10 @@ class TitleBuilder implements ElementBuilder {
 }
 
 
-// DIRECTOR
-// Constructs an object using Builder interface
+/**
+ * **Director:**
+ * Constructs an object using Builder interface
+ */
 class ElementDirector {
   constructor(public builder: ElementBuilder) { }
 
@@ -124,14 +128,15 @@ class ElementDirector {
 }
 
 
-// PRODUCT
-// Represents complex object under construction
-// Concrete Builder builds product's internal
-// representation and defines assembly process
-// ...............
-// Typically this isn't needed, but could
-// be a summary of getting/setting done by builder
-// and controlled by director
+/**
+ * **[Product(s)]:**
+ * Represents complex object under construction
+ * Concrete Builder builds product's internal
+ * representation and defines assembly process.
+ * Typically this _isn't_ needed, but could
+ * be a summary of getting / setting done by builder
+ * and controlled by director.
+ */
 class TitleElementProduct {
   constructor(
     public element: string,
@@ -140,9 +145,11 @@ class TitleElementProduct {
 }
 
 
-// CLIENT
-// Can control builds through director
-// retrieve products from the builder
+/**
+ * _Client_
+ * Can control builds through director
+ * retrieve products from the builder
+ */
 function clientExample() {
   // Initialize
   const builder = new TitleBuilder()
@@ -159,5 +166,4 @@ function clientExample() {
 }
 
 
-// Test exports
 export { ElementDirector, TitleBuilder }
