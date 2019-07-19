@@ -1,12 +1,13 @@
 {
   "name": "design-patterns",
   "version": "0.0.1",
-  "description": "Object-oriented design patterns notes.",
+  "description": "Object-oriented design patterns notes and typescript examples.",
   "main": "index.js",
   "scripts": {
     "t": "jest",
     "t:watch": "jest --watch",
-    "t:cover": "jest --collect-coverage"
+    "t:cover": "jest --collect-coverage",
+    "t:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "repository": {
     "type": "git",
