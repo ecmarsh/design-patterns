@@ -21,14 +21,17 @@
  * In JS, you can use built-in Proxy(RealSubject, Handler) for trapping requests.
  */
 
-// PROXY
-// Maintains a reference to subject for access.
-// Provides interface identical to subjects.
-// Controls access to real subject - may create/delete.
-// Remote proxies encode requests for real subject.
-// Virtual proxies (caching proxies) cache additional
-// information in order to postpone accessing it.
-// Protection proxy checks that caller has access permissions.
+
+/**
+ * **Proxy**
+ * Maintains a reference to subject for access.
+ * Provides interface identical to subjects.
+ * Controls access to real subject - may create/delete.
+ * Remote proxies encode requests for real subject.
+ * Virtual proxies (caching proxies) cache additional
+ * information in order to postpone accessing it.
+ * Protection proxy checks that caller has access permissions.
+ */
 class Balancer implements Subject {
   private servers: { [key: string]: Server } = {
     santaClara: new Server('norcal.website.com', 'Santa Clara'),
@@ -50,9 +53,11 @@ class Balancer implements Subject {
 }
 
 
-// SUBJECT<I>
-// Defines common interface for RealSubject and Proxy
-// so proxy can be used anywhere real subject is expected.
+/**
+ * **Subject:**
+ * Defines common interface for RealSubject and Proxy
+ * so proxy can be used anywhere real subject is expected.
+ */
 interface Subject {
   get(endpoint: string, location: string): Response
   post(endpoint: string, data: Data, location: string): Response
@@ -61,8 +66,11 @@ interface Subject {
 interface Response { status: number, content: string }
 interface Data { [page: string]: string }
 
-// REAL SUBJECT
-// Defines real object that proxy represents.
+
+/**
+ * **Real Subject:**
+ * Defines real object that proxy represents.
+ */
 class Server implements Subject {
   constructor(protected NS: string, public location: string) { }
 
@@ -87,8 +95,13 @@ class Server implements Subject {
   }
 }
 
-// Helpers for magic numbers/strings + testing replication
-function responses(content: string = '') {
+/**
+ * Generates common response objects.
+ * _Note for testing:_ each call will
+ * generate a different object reference.
+ * Pass in a response to override the response content.
+ */
+function responses(content: string = ''): { [desc: string]: Response } {
   return {
     ok: { status: 201, content: content || 'OK' },
     created: { status: 201, content: content || 'Created' },

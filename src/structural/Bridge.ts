@@ -20,9 +20,12 @@
  * Note: If there's only one implementation, creating an abstract Implementor class isn't necessary. There's a one-to-one relationship between Abstraction and Implementor.
  */
 
-// ABSTRACTION
-// Defines the abstraction's interface.
-// Maintains a reference to an object of type Implementor.
+
+/**
+ * **Abstraction:**
+ * Defines the abstraction's interface.
+ * Maintains a reference to an object of type Implementor.
+ */
 interface Abstraction {
   getPayment(): number
 }
@@ -48,8 +51,10 @@ class Payment implements Abstraction {
   private applyInterest = (baseRate: number) => baseRate + this.markupRate
 }
 
-// REFINED ABSTRACTION (optional)
-// Extends the interface defined by Abstraction.
+/**
+ * _[Refined Abstraction]_
+ * Extends the interface defined by Abstraction.
+ */
 interface RefinedAbstraction extends Abstraction {
   chargeLateFee(payment: number): number
 }
@@ -65,19 +70,22 @@ class LatePayment extends Payment implements RefinedAbstraction {
 }
 
 
-// IMPLEMENTOR<I>
-// Defines interface for implementing classes.
-// Typically the impl interface provides only primitive operations,
-// and Abstraction defines higher-level ops based on these primitives.
+/**
+ * **Implementor:**
+ * Defines interface for implementing classes.
+ * Typically the impl interface provides only primitive operations,
+ * and Abstraction defines higher-level ops based on these primitives.
+ */
 interface Implementor {
   getRate(): number
   getPeriods(): number
 }
 
-
-// CONCRETE IMPLEMENTOR
-// Implements the Implementor interface
-// and defines its concrete implementation.
+/**
+ * **Concrete Implementor(s):**
+ * Implements the Implementor interface
+ * and defines its concrete implementation.
+ */
 class CarPayment implements Implementor {
   constructor(
     private creditScore: number,
@@ -105,7 +113,10 @@ class Mortgage implements Implementor {
   public getPeriods = (): number => this.periodMonths
 }
 
-// Common shared helper, unknown to client
+/**
+ * Shared helper among concrete implementors.
+ * @returns The rate for corresponding credit score.
+ */
 function getRate(creditScore: number) {
   switch (creditScore) {
     case 800: return 2
@@ -116,9 +127,11 @@ function getRate(creditScore: number) {
 }
 
 
-// CLIENT
-// Requests using Abstraction Interface
-// which forwards requests to Implementor object.
+/**
+ * _Client_
+ * Requests using Abstraction Interface
+ * which forwards requests to Implementor object.
+ */
 interface Client { payment: Abstraction }
 
 class Bank implements Client {

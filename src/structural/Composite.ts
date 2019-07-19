@@ -26,14 +26,16 @@
  */
 
 
-// COMPONENT
-// Declares common interface for objects in composition.
-// Implements default behavior for
-// interface common to all classes.
-// Also declares interface for accessing
-// and managing child components.
-// Optionally defines an interface for accessing a
-// component's parent in the recursive structure.
+/**
+ * **Component:**
+ * Declares common interface for objects in composition.
+ * Implements default behavior for
+ * interface common to all classes.
+ * Also declares interface for accessing
+ * and managing child components.
+ * Optionally defines an interface for accessing a
+ * component's parent in the recursive structure.
+ */
 interface Common {
   name: string
   size: number
@@ -53,16 +55,19 @@ abstract class Component implements Common {
     public parent = null
   ) { }
 
-  // Min size is 2
+  /** Compresses file size. Min size is 2 */
   compress = () => {
     this.size = (this.size >> 1) + 1
     return this.size
   }
 }
 
-// LEAF
-// Represents leaf objects (no children).
-// Defines behavior for primitive objects in composition.
+
+/**
+ * **Leaf**
+ * Represents leaf objects (no children).
+ * Defines behavior for primitive objects in composition.
+ */
 interface Leaf extends Common { }
 
 class File extends Component implements Leaf {
@@ -79,10 +84,13 @@ class File extends Component implements Leaf {
   }
 }
 
-// COMPOSITE
-// Defines behavior for components having children.
-// Stores child components and implements
-// child-related operations in component interface.
+
+/**
+ * **Composite:**
+ * Defines behavior for components having children.
+ * Stores child components and implements
+ * child-related operations in component interface.
+ */
 interface Composite extends Common {
   add(child: Leaf): void
   remove(child: Leaf): void
@@ -118,13 +126,16 @@ class Directory extends Component implements Composite {
   getChild = (name: string) => this.children[name]
 }
 
-// CLIENT
-// Manipulates objects in the composition
-// through the Component interface.
-// If the recipient is a Leaf, then
-// the request is handled directly.
-// If it is a Composite, then it forwards
-// requests to child components, possibly performing
-// additional operations before/after forwarding.
+
+/**
+ * _Client_
+ * Manipulates objects in the composition
+ * through the Component interface.
+ * If the recipient is a Leaf, then
+ * the request is handled directly.
+ * If it is a Composite, then it forwards
+ * requests to child components, possibly performing
+ * additional operations before/after forwarding.
+ */
 
 export { File, Directory }

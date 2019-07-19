@@ -18,15 +18,21 @@
  *
  */
 
-// COMPONENT
-// Defines interface for objects that can be decorated.
+
+/**
+* **Component**
+* Defines interface for objects that can be decorated.
+*/
 interface Component {
   priceUSD: number
   addToCart(cart: Cart): void
 }
 
-// CONCRETE COMPONENT
-// The actual object that can be decorated.
+
+/**
+ * **Concrete Component:**
+ * The actual object that can be decorated.
+ */
 class Item implements Component {
   constructor(
     public name: string,
@@ -38,9 +44,12 @@ class Item implements Component {
   }
 }
 
-// DECORATOR
-// Maintains reference to Component object and
-// defines an interface that conforms to Component's interface.
+
+/**
+ * **Decorator:**
+ * Maintains reference to Component object and
+ * defines an interface that conforms to Component's interface.
+ */
 abstract class Decorator implements Component {
   abstract addExtra(price: number): number
 
@@ -53,8 +62,11 @@ abstract class Decorator implements Component {
   public addToCart = this.component.addToCart
 }
 
-// CONCRETE DECORATOR
-// Adds responsibilities to the component
+
+/**
+ * **Concrete Decorators:**
+ * Adds responsibilities to the component.
+ */
 class WithTenBucksShipping extends Decorator {
   constructor(component: Component) {
     super(component)
@@ -73,7 +85,11 @@ class WithFiveBuckDiscount extends Decorator {
   }
 }
 
-// Client/Testing
+
+/**
+ * _Client/Testing_
+ * Imitates an online "shopping cart".
+ */
 class Cart {
   private items: Component[] = []
 

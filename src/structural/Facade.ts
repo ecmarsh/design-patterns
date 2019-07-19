@@ -16,11 +16,14 @@
  * Note: Proxy is not the same as it shares the same interface as the "subsystem", so is interchangable. Facade provides a simpler interface.
  */
 
-// FACADE
-// Knows which subsystem classes are responsible for a request
-// and delegates client requests to subsystem accordingly.
-// May occasionally do work of its own before passing along
-// request to the appropriate subsystem.
+
+/**
+ * **Facade:**
+ * Knows which subsystem classes are responsible for a request
+ * and delegates client requests to subsystem accordingly.
+ * May occasionally do work of its own before passing along
+ * request to the appropriate subsystem.
+ */
 interface Facade {
   runDev(): Config
   runProd(): Config
@@ -53,10 +56,13 @@ class Scripts implements Facade {
   }
 }
 
-// SUBSYSTEM CLASSES
-// Implement subsystem functionality.
-// Handle work assigned by the Facade object.
-// Have no knowledge of Facade (no refs to Facade).
+
+/**
+ * **Subsystem Classes**
+ * Implement subsystem functionality.
+ * Handle work assigned by the Facade object.
+ * Have no knowledge of Facade (no refs to Facade).
+ */
 class DevServer {
   public static getURL = (port: number) => `http://localhost:${port}/`
 }
@@ -75,11 +81,12 @@ class Processor {
   public process = () => 'processed ' + this.css
 }
 
-// CLIENT
-// Communicate through Facade to subsystem.
-// Do not have access to subsystem objects directly.
 
+/**
+ * _Client_
+ * Communicates through Facade to subsystem.
+ * Do not have access to subsystem objects directly.
+ */
 export default Scripts
-
-// For spying
+/** Test servers were called */
 export { DevServer, ProdServer }

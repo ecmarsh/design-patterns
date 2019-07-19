@@ -14,23 +14,29 @@
  *
  */
 
-// TARGET<I>
-// Defines the domain-specific interface that Client uses.
+/**
+ * **Target:**
+ * Defines the domain-specific interface that Client uses.
+ */
 interface RGBColor {
   getTriple(): RGB
 }
 
-type RGB = [number, number, number] // ex: [255, 255, 255]
+/** @example [255, 255, 255] */
+type RGB = [number, number, number]
 
 
-// CLIENT
-// Collaborates with objects conforming to the target interface.
-// Calls operations on adapter instance which is passed to adaptee.
+/**
+ * _Client:_
+ * Collaborates with objects conforming to the target interface.
+ * Calls operations on adapter instance which is passed to adaptee.
+ */
 interface Client {
   createRgba(): RGBa
 }
 
-type RGBa = string // ex: "rgba(255,255,255,0.8)"
+/** @example "rgba(255,255,255,0.8)" */
+type RGBa = string
 
 class TransparentColor implements Client {
   constructor(private rgb: RGBColor, private opacity: number) { }
@@ -41,13 +47,16 @@ class TransparentColor implements Client {
 }
 
 
-// ADAPTEE
-// Defines an existing interface that needs adapting.
+/**
+ * **Adaptee:**
+ * Defines an existing interface that needs adapting.
+ */
 interface Adaptee {
   getHex(): Hex
 }
 
-type Hex = string // ex: '#FFFFFF'
+/** @example '#FFFFFF' */
+type Hex = string
 
 class HexColor implements Adaptee {
   constructor(private hex: Hex) { }
@@ -55,10 +64,12 @@ class HexColor implements Adaptee {
 }
 
 
-// ADAPTER
-// Adapts the interface of Adaptee to target interface.
-// Object adapter composes the adaptee instance internally
-// and implements in terms of target interface.
+/**
+ * **Adapter:**
+ * Adapts the interface of Adaptee to target interface.
+ * Object adapter composes the adaptee instance internally
+ * and implements in terms of target interface.
+ */
 class HexAdapter implements Adaptee, RGBColor {
   private hexColor: Adaptee
 
@@ -84,5 +95,6 @@ class HexAdapter implements Adaptee, RGBColor {
     return rgb as RGB
   }
 }
+
 
 export { HexAdapter, TransparentColor }

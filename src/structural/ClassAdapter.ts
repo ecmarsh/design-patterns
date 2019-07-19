@@ -16,15 +16,21 @@
  *
  */
 
-// TARGET<I>
-// Defines the domain-specific interface that Client uses.
+
+/**
+ * **Target:**
+ * Defines the domain-specific interface that Client uses.
+ */
 interface Target {
   getNumbers(): number[]
 }
 
-// CLIENT
-// Collaborates with objects conforming to the target interface.
-// Calls operations on adapter instance which is passed to adaptee.
+
+/**
+ * _Client_
+ * Collaborates with objects conforming to the target interface.
+ * Calls operations on adapter instance which is passed to adaptee.
+ */
 class Aggregator {
   static sum = (collection: Target) => {
     const data = collection.getNumbers()
@@ -32,8 +38,11 @@ class Aggregator {
   }
 }
 
-// ADAPTEE
-// Defines an existing interface that needs adapting.
+
+/**
+ * **Adaptee:**
+ * Defines an existing interface that needs adapting.
+ */
 interface Adaptee {
   getWord(): string
 }
@@ -43,9 +52,12 @@ class Word implements Adaptee {
   public getWord = () => this.word
 }
 
-// ADAPTER
-// Adapts the interface of Adaptee to target interface.
-// Class: Inherit targets interface and adaptees implementation.
+
+/**
+ * **Adapter:**
+ * Adapts the interface of Adaptee to target interface.
+ * Class: Inherit targets interface and adaptees implementation.
+*/
 class WordAdapterForAggregator extends Word implements Target {
   public getNumbers = (): number[] => {
     const word = this.getWord()
