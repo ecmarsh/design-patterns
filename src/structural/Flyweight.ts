@@ -34,8 +34,7 @@
  * Enables sharing but does not enforce it.
  */
 interface Flyweight {
-  id: number
-  operation(...extrinsicState: any[]): any
+  call(extrinsicState?: string): string
 }
 
 
@@ -47,16 +46,14 @@ interface Flyweight {
  * should be independent of its context.
  */
 interface ConcreteFlyweight extends Flyweight {
-  intrinsicState: any
+  code: string // intrinsicState
 }
 
-class CFW implements ConcreteFlyweight {
-  constructor(
-    public id: number,
-    public intrinsicState: any
-  ) { }
-
-  operation(...extrinsicState: any[]) { }
+class AreaCode implements ConcreteFlyweight {
+  public constructor(public code: string) {}
+  public call(tel?: string): string {
+    return `+1${this.code}${tel}`
+  }
 }
 
 
@@ -64,56 +61,76 @@ class CFW implements ConcreteFlyweight {
  * **Unshared Concrete Flyweight:**
  * Not all subclasses of flyweight need to be shared.
  * May or may not have shared concrete flyweights as children.
+ * Since these may be only closely related to concrete flyweights,
+ * it could be tempting to let Client instiate these instead of
+ * going through factory. However, leaving them in factory allows
+ * us to add these to sharables later without client being affected.
  */
-interface UnsharedConcreteFlyweight extends Flyweight { }
+class ServiceCode implements Flyweight {
+  public constructor(private tel: string) {}
 
-class USCFW implements UnsharedConcreteFlyweight {
-  constructor(public id: number, rest: any) { }
-  operation(...extrinsicState: any[]) { }
+  public call() {
+    return this.tel
+  }
 }
 
 
 /**
-* **Flyweight Factory:**
-* Manages flyweight objects and supplies
-* flyweight instances or creates one if none exists.
-* Ensures that flyweights are shared properly.
-*/
+ * **Flyweight Factory:**
+ * Manages flyweight objects and supplies
+ * flyweight instances or creates one if none exists.
+ * Ensures that flyweights are shared properly.
+ */
 class FlyweightFactory {
-  private static flyweights: { [key: string]: Flyweight } = {}
+  private static flyweights: { [code: string]: ConcreteFlyweight } = {}
   /**
    * Create an instance with available methods to
    * manipulate the FlyweightFactory Singleton.
    * The instances methods are the Singletons;
    * remember to cleanup after using.
    */
-  public static createInstance() {
-    const { getFlyweight, clear } = FlyweightFactory
-    return { getFlyweight, clear }
+  public static createTestable(): Testable {
+    const { clear, getCount } = FlyweightFactory
+    return { clear, getCount }
   }
   /**
-  * Clears all registered flyweights in factory Singleton.
-  * Use for isolated testing and cleanup.
-  */
+   * Returns the existing or newly created instance of a
+   * flyweight containing shared method(s) or data.
+   */
+  public static getFlyweight(code: string) {
+    if (!FlyweightFactory.flyweights[code]) {
+      FlyweightFactory.register(new AreaCode(code))
+    }
+    return FlyweightFactory.flyweights[code]
+  }
+  /**
+   * Returns an unshared flyweight simply by
+   * creating an instance. We leave this in the factory
+   * in case we decide to share data/methods later.
+   */
+  public static getUnsharedFlyweight(tel: string) {
+    return new ServiceCode(tel)
+  }
+  /**
+   * Clears all registered flyweights in factory Singleton.
+   * Use for isolated testing and cleanup.
+   */
   private static clear() {
     FlyweightFactory.flyweights = {}
   }
   /**
-  * Returns the existing or newly created instance of a
-  * flyweight containing shared method(s) or data.
-  */
-  private static getFlyweight(id: number, ...rest: any[]) {
-    if (!FlyweightFactory.flyweights[id]) {
-      FlyweightFactory.register(new CFW(id, rest))
-    }
-
-    return FlyweightFactory.flyweights[id]
+   * Returns count of number of stored flyweights.
+   * Use to compare with number of objects created.
+   */
+  private static getCount() {
+    return Object.keys(FlyweightFactory.flyweights).length
   }
 
-  private static register(flyweight: Flyweight) {
-    FlyweightFactory.flyweights[flyweight.id] = flyweight
+  private static register(flyweight: ConcreteFlyweight) {
+    FlyweightFactory.flyweights[flyweight.code] = flyweight
   }
 }
+
 
 
 /**
@@ -123,5 +140,70 @@ class FlyweightFactory {
  * Should obtain Flyweight objects from the Factory.
  */
 
+ interface Testable {
+   clear(): void
+   getCount(): number
+   [key: string]: (...args: any[]) => any
+ }
 
-export { FlyweightFactory }
+ /**
+  * Maintains a registry of phone numbers.
+  * Use to compare against number of flyweights.
+  */
+class YellowPages {
+  private static directory: Set<Phone> = new Set()
+
+  public static createTestable(): Testable {
+    const { getCount, clear } = YellowPages
+    return { getCount, clear }
+  }
+
+  public static register(phone: Phone) {
+    YellowPages.directory.add(phone)
+  }
+
+  private static getCount() {
+    return YellowPages.directory.size
+  }
+
+  private static clear() {
+    YellowPages.directory.clear()
+  }
+}
+
+class Phone {
+  /** The last seven digits of a phone number, stored as string */
+  public tel: string
+  public areaCode: AreaCode
+
+  /** Example: '4151234567' */
+  public constructor(fullTel: string) {
+    this.areaCode = FlyweightFactory.getFlyweight(fullTel.substring(0, 3))
+    this.tel = fullTel.substring(3)
+    this.register()
+  }
+
+  public call() {
+    return this.areaCode.call(this.tel)
+  }
+
+  private register() {
+    YellowPages.register(this)
+  }
+}
+
+class ServicePhone {
+  private tel: Flyweight
+
+  /** Example: '911' */
+  public constructor(fullTel: string) {
+    this.tel = FlyweightFactory.getUnsharedFlyweight(fullTel)
+  }
+
+  public call() {
+    return this.tel.call()
+  }
+}
+
+
+export { FlyweightFactory, YellowPages, Phone, ServicePhone }

@@ -16,7 +16,6 @@
  * Note: Proxy is not the same as it shares the same interface as the "subsystem", so is interchangable. Facade provides a simpler interface.
  */
 
-
 /**
  * **Facade:**
  * Knows which subsystem classes are responsible for a request
@@ -37,25 +36,24 @@ interface Config {
 }
 
 class Scripts implements Facade {
-  public runDev() {
+  public runDev(): Config {
     return {
       url: DevServer.getURL(3000),
       es: Babel.transpile(2018),
       styles: Styles.get(),
-      hot: true
-    }
+      hot: true,
+    };
   }
 
-  public runProd() {
+  public runProd(): Config {
     return {
       url: ProdServer.getURL(),
       es: Babel.transpile(2014),
       styles: new Processor(Styles.get()).process(),
-      hot: false
-    }
+      hot: false,
+    };
   }
 }
-
 
 /**
  * **Subsystem Classes**
@@ -77,10 +75,9 @@ class Styles {
   public static get = () => Styles.css
 }
 class Processor {
-  constructor(private css: string) { }
+  public constructor(private css: string) {}
   public process = () => 'processed ' + this.css
 }
-
 
 /**
  * _Client_
