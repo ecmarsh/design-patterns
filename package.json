@@ -50,7 +50,10 @@
     },
     "rules": {
       "indent": "off",
-      "@typescript-eslint/indent": ["error", 2],
+      "@typescript-eslint/indent": [
+        "error",
+        2
+      ],
       "@typescript-eslint/member-delimiter-style": "off",
       "@typescript-eslint/no-use-before-define": "off",
       "@typescript-eslint/no-parameter-properties": "off",
