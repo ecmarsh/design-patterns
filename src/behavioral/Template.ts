@@ -1,4 +1,3 @@
-import EventEmitter from 'events'
 /**
  * Template Method
  *
@@ -27,6 +26,7 @@ import EventEmitter from 'events'
  *
  */
 
+import EventEmitter from 'events'
 
 /**
  * **Abstract Class**
@@ -56,6 +56,10 @@ abstract class Component {
    * abstract and hook primitive ops.
    */
   private listen() {
+    this.emitter.on('error', (error: Error) => {
+      DOM.mount(`<p>Error: ${error.message}</p>`)
+    })
+
     this.emitter.once('init', () => {
       DOM.mount(this.render())
     })

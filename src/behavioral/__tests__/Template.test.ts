@@ -14,8 +14,13 @@ describe('Template Method', function testTemplateMethod() {
   test('Listeners', () => {
     const listeners = app.emitter.eventNames()
     expect(listeners).toMatchObject(
-      ['init', 'mount', 'update', 'unmount']
+      ['error', 'init', 'mount', 'update', 'unmount']
     )
+  })
+
+  test('Error', () => {
+    app.emitter.emit('error', new Error('Oops!'))
+    expect(DOM.body).toMatch(/oops/i)
   })
 
   test('Initial render', () => {
