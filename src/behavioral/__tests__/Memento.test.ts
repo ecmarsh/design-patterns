@@ -43,6 +43,24 @@ describe('Memento', function testMemento() {
     expect(git.log()).toHaveLength(2)
   })
 
+  test('Caretaker duplicate id resolution', () => {
+    const caretaker = Git.init(new File())
+
+    let counter = 0
+    caretaker['makeId'] = jest.fn()
+      .mockImplementation(() => ++counter < 3 ? 'DUPCASE' : 'UNIQUE1')
+
+    // commit() ->
+    //  1. 'DUPCASE'
+    //  2. 'DUPCASE'
+    //  3. 'UNIQUE1'
+
+    caretaker.commit()
+    expect(caretaker['makeId']).toHaveBeenCalledTimes(1)
+    caretaker.commit()
+    expect(caretaker['makeId']).toHaveBeenCalledTimes(3)
+  })
+
   test('Restore memento - "Rebase"', () => {
     const file = new File('first.txt', 'hello')
     const git = Git.init(file)
