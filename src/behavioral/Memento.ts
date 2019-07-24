@@ -17,6 +17,7 @@
  * Note: If state/changes are in a predictable sequence, you can simply store the incremental change. (E.g undos)
  */
 
+
 /**
  * **Memento:**
  * Stores necessary internal state of Originator.
@@ -30,14 +31,14 @@
  * creator (Originator) will assign/retrieve its state.
  */
 interface Memento {
-  getState(): State
+  getState(): Resource
 }
 
-class M implements Memento {
-  private state: State
+class Commit implements Memento {
+  private state: Resource
 
   /** Narrow public interface? */
-  public constructor(state: State) {
+  public constructor(state: Resource) {
     this.state = state
     this.freezeState()
   }
@@ -52,14 +53,18 @@ class M implements Memento {
   }
 }
 
-/** The state for the memento to store */
+/**
+ * The state for the memento to store.
+ * In this case, it is the entire state, but
+ * it may be only partial if some aspects don't vary.
+ */
 interface State { }
-
-interface File extends State {
+interface Resource extends State {
   name: string
   text: string
-  sizeKB: number
+  sizeBytes: number
 }
+
 
 /**
  * **Originator:**
@@ -71,17 +76,40 @@ interface Originator {
   createMemento(): Memento
 }
 
-class O implements Originator {
-  private state: State = {}
+class File implements Originator {
+  private state: Resource
+
+  public constructor(name: string = 'Untitled.txt', text: string = '') {
+    this.state = {
+      name,
+      text,
+      sizeBytes: text.length + 1
+    }
+  }
 
   public setMemento(memento: Memento) {
     this.state = memento.getState()
   }
 
   public createMemento(): Memento {
-    return new M(this.state)
+    return new Commit(this.state)
+  }
+
+  // Methods specific to example
+  public rename(name: string) {
+    const state = { ...this.state }
+    state.name = name
+    this.state = state
+  }
+
+  public addText(text: string) {
+    const state = { ...this.state }
+    state.text += text
+    state.sizeBytes += text.length
+    this.state = state
   }
 }
+
 
 /**
  * **Caretaker:**
@@ -90,27 +118,81 @@ class O implements Originator {
  * _Never_ operates on or examines the contents of a memento.
  */
 interface Caretaker {
-  addMemento(memento: Memento): number
-  getMemento(key: number): Memento
+  addMemento(memento: Memento): string
+  getMemento(key: string): Memento
 }
 
-class CT implements Caretaker {
-  private mementos: { [key: number]: Memento } = {}
-  private lastKey: number = 0
+class MementoManager implements Caretaker {
+  protected mementos: { [id: string]: Memento } = {}
 
-  public addMemento(memento: Memento): number {
-    this.mementos[++this.lastKey] = memento
-    return this.lastKey
+  public addMemento(memento: Memento): string {
+    const id = this.makeUniqueId()
+    this.mementos[id] = memento
+    return id
   }
 
-  public getMemento(key: number): Memento {
-    return this.mementos[key]
+  public getMemento(id: string): Memento {
+    return this.mementos[id]
+  }
+
+  /** Ensure the generated id is unique */
+  private makeUniqueId(): string {
+    let id: string
+    do {
+      id = this.makeId()
+    } while (id in this.mementos)
+    return id
+  }
+
+  /** Generate a random 128-bit "id"*/
+  private makeId(): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, 15)
+      .toUpperCase()
   }
 }
+
 
 /**
  * _Client_
- * Requests mementos from originator (as side effect?)
+ * Requests mementos from originator.
+ * Caretaker can be updated as a side effect
+ * (e.g if "committed" changes on every file change)
+ * or invoked by client as in this example.
  */
+class Git extends MementoManager {
+  public static init(originator: Originator) {
+    return new Git(originator)
+  }
 
-export { CT }
+  private originator: Originator
+
+  public constructor(originator: Originator) {
+    super()
+    this.originator = originator
+  }
+
+  public commit() {
+    return this.addMemento(
+      this.originator.createMemento()
+    )
+  }
+
+  public rebase(id: string) {
+    return this.originator.setMemento(
+      this.getMemento(id)
+    )
+  }
+
+  public checkout(id: string) {
+    return this.getMemento(id)
+  }
+
+  public log() {
+    return Object.keys(this.mementos)
+  }
+}
+
+
+export { Git, File }
