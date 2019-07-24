@@ -6,7 +6,6 @@
  * To capture and externalize an object's state for later use.
  * When a direct interface to obtaining state would break encapsulation by exposing implementation details.
  *
- *
  * ----------
  * Consequences:
  * + Preserves encapsulation.
@@ -15,6 +14,7 @@
  * - A caretaker might incur large storage costs when storing mementos since it is ignorant of amount of state in Memento.
  *
  * Note: If state/changes are in a predictable sequence, you can simply store the incremental change. (E.g undos)
+ * 
  */
 
 
@@ -31,25 +31,18 @@
  * creator (Originator) will assign/retrieve its state.
  */
 interface Memento {
-  getState(): Resource
+  getState(): string
 }
 
 class Commit implements Memento {
-  private state: Resource
+  private state: FileData
 
-  /** Narrow public interface? */
-  public constructor(state: Resource) {
-    this.state = state
-    this.freezeState()
+  public constructor(state: string) {
+    this.state = JSON.parse(state)
   }
 
   public getState() {
-    return this.state
-  }
-
-  /** Make state immutable after construction. */
-  private freezeState() {
-    Object.freeze(this.state)
+    return JSON.stringify(this.state)
   }
 }
 
@@ -59,7 +52,7 @@ class Commit implements Memento {
  * it may be only partial if some aspects don't vary.
  */
 interface State { }
-interface Resource extends State {
+interface FileData extends State {
   name: string
   text: string
   sizeBytes: number
@@ -77,7 +70,7 @@ interface Originator {
 }
 
 class File implements Originator {
-  private state: Resource
+  private state: FileData
 
   public constructor(name: string = 'Untitled.txt', text: string = '') {
     this.state = {
@@ -88,11 +81,11 @@ class File implements Originator {
   }
 
   public setMemento(memento: Memento) {
-    this.state = memento.getState()
+    this.state = JSON.parse(memento.getState())
   }
 
   public createMemento(): Memento {
-    return new Commit(this.state)
+    return new Commit(JSON.stringify(this.state))
   }
 
   // Methods specific to example
@@ -122,7 +115,7 @@ interface Caretaker {
   getMemento(key: string): Memento
 }
 
-class MementoManager implements Caretaker {
+class MementoCareTaker implements Caretaker {
   protected mementos: { [id: string]: Memento } = {}
 
   public addMemento(memento: Memento): string {
@@ -135,7 +128,7 @@ class MementoManager implements Caretaker {
     return this.mementos[id]
   }
 
-  /** Ensure the generated id is unique */
+  /** Ensures the generated id is unique. */
   private makeUniqueId(): string {
     let id: string
     do {
@@ -144,11 +137,11 @@ class MementoManager implements Caretaker {
     return id
   }
 
-  /** Generate a random 128-bit "id"*/
+  /** Imitates the SHA-1 hash, but stores only the first 7 characters. */
   private makeId(): string {
     return Math.random()
-      .toString(36)
-      .substring(2, 15)
+      .toString(16)
+      .substring(2, 9)
       .toUpperCase()
   }
 }
@@ -161,7 +154,7 @@ class MementoManager implements Caretaker {
  * (e.g if "committed" changes on every file change)
  * or invoked by client as in this example.
  */
-class Git extends MementoManager {
+class Git extends MementoCareTaker {
   public static init(originator: Originator) {
     return new Git(originator)
   }
