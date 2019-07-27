@@ -22,98 +22,199 @@
  * Implementation Notes:
  * Commands can vary from simply defining a binding between receiver and actions that carry out request to implementing everything itself w/o delegation to receiver. Use the latter to define commands independent of existing classes, when no suitable receiver exists, or when a command knows its receiver implicitly.
  * Only use complex command patterns that support undo, transformations, conflict resolution, etc. when needed. Start simply with the task pattern. In short, YAGNI.
+ * 
+ * To generalize, pass around an object w a callback and target, then use another object to invoke the callback on the target. Can be implemented in many ways. Helpful when commands vary may have different targets.
  */
 
 
 /**
- * **Command:**
+ * **Command**
  * Declares an interface for executing an operation.
  */
 interface Command {
-  execute(): any
+  execute(...args: any[]): any
 }
 
 /**
- * **Concrete Command:**
+ * **Concrete Commands**
  * Defines a binding between a receiver object and an action.
  * When commands are undoable, Concrete Command stores state
  * for undoing the command prior to invoking `execute`.
  * Invokes operations on its receiver to carry out the request.
  */
-class ConcreteCommand implements Command {
-  private receiver: Receiver
-  private receiverArgs: any[]
+abstract class SimpleCommand implements Command {
+  protected abstract operation: Operation
 
-  public constructor(receiver: Receiver, ...receiverArgs: any[]) {
+  protected receiver: Receiver
+  protected value: number
+
+  public constructor(receiver: Receiver, value: number) {
     this.receiver = receiver
-    this.receiverArgs = receiverArgs
+    this.value = value
   }
 
   public execute() {
-    this.receiver.action(...this.receiverArgs)
+    this.receiver.action(this.operation, this.value)
+  }
+}
+
+class Plus extends SimpleCommand {
+  protected operation: Operation = function add(x, y) {
+    return x + y
+  }
+
+  public constructor(receiver: Receiver, value: number) {
+    super(receiver, value)
+  }
+}
+
+class Minus extends SimpleCommand {
+  protected operation: Operation = function subtract(x, y) {
+    return x - y
+  }
+
+  public constructor(receiver: Receiver, value: number) {
+    super(receiver, value)
   }
 }
 
 
 /**
- * _Client/Application_
- * Creates a Concrete Command object and
- * sets/specifies its receiver.
- */
-function client() {
-  const receiver = new ConcreteReceiver(),
-    command = new ConcreteCommand(receiver),
-    invoker = new ConcreteInvoker
-
-  invoker.setCommand(command)
-  invoker.executeCommand()
-}
-
-
-/**
- * **Invoker:**
- * Asks the command to carry out the request.
- * Issues a request by calling `execute` on the command.
+ * **Invoker**
+ * Also known as 'Sender'.
+ * Asks the command to carry out a request
+ * by calling `execute` on the command.
  */
 interface Invoker {
   setCommand(cmd: Command): any
   executeCommand(): any
 }
 
-class ConcreteInvoker implements Invoker {
-  private command?: Command
+class Calculator implements Invoker {
+  private commandStack: CommandStack = new CommandStack()
 
-  public setCommand(cmd: Command) {
-    this.command = cmd
+  public setCommand(cmd: Command): number {
+    return this.commandStack.append(cmd)
   }
 
   public executeCommand() {
-    if (!this.command) {
-      throw Error(
-        'Invoker needs a command to execute. \
-         Use setCommand(cmd) to set a command first.'
-      )
+    const command = this.commandStack.pop()
+    if (!command) {
+      const msg = 'Invoker needs a command to execute. Set a command first.'
+      throw Error(msg)
     }
-    this.command.execute()
+    command.execute()
+  }
+}
+
+/** Stores commands. */
+class CommandStack {
+  private commands: Command[] = []
+  private size: number = 0
+
+  public isEmpty() {
+    return this.size === 0
+  }
+
+  public append(cmd: Command): number {
+    this.commands[this.size++] = cmd
+    return this.size
+  }
+
+  public peek(): Command | void {
+    if (!this.isEmpty()) {
+      return this.commands[this.size - 1]
+    }
+  }
+
+  public pop(): Command | void {
+    const lastIn = this.peek()
+    if (lastIn) {
+      this.size--
+      return lastIn
+    }
   }
 }
 
 
 /**
 * **Receiver:**
+* The target of an object request.
 * Knows how to perform the operations
 * associated with carrying out a request.
-* Any class may serve as a Receiver.
+* Any class can serve as a Receiver.
 */
 interface Receiver {
   action(...args: any[]): any
+  display(): any
 }
 
-class ConcreteReceiver implements Receiver {
-  public action(...args: any[]) {
-    // Do action
+type Operation = (x: number, y: number) => number
+
+class CalcComputer implements Receiver {
+  private value: number
+
+  public constructor(value: number = 0) {
+    this.value = value
+  }
+
+  public action(op: Operation, value: number = 0) {
+    this.value = op(this.value, value)
+  }
+
+  public display(): number {
+    return this.value
+  }
+}
+
+/**
+ * _Client_
+ * Creates a Concrete Command object
+ * and needs to set/specify its receiver.
+ * Note its easy to add new operations by simply
+ * creating another command objects (e.g mult/div).
+ */
+class CalculatorApp {
+  private receiver: Receiver
+  private invoker: Invoker
+
+  public constructor(initialValue?: number) {
+    this.receiver = new CalcComputer(initialValue)
+    this.invoker = new Calculator()
+  }
+
+  public add(value: number): this {
+    this.invoker.setCommand(new Plus(this.receiver, value))
+    return this
+  }
+
+  public subtract(value: number): this {
+    this.invoker.setCommand(new Minus(this.receiver, value))
+    return this
+  }
+
+  public display(): number {
+    return this.receiver.display()
+  }
+
+  public equals(): number | string {
+    try {
+      this.invoker.executeCommand()
+    } catch (e) {
+      // Swallow
+    } finally {
+      return this.display()
+    }
   }
 }
 
 
-export { }
+export {
+  CalculatorApp,
+  CommandStack,
+  Calculator,
+  CalcComputer,
+  SimpleCommand,
+  Plus,
+  Minus,
+}
