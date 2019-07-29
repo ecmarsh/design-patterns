@@ -90,14 +90,14 @@ class RequestHandler implements Handler {
   }
 
   protected resolveAsModule(mod: Directory) {
-    // Resolve with package
+    // Resolve with package's main file, if exists
     if (mod.hasPackage()) {
       const pkg = mod.entries['package.json'] as Package
       if (mod.hasFile(pkg.main.replace('.js', ''))) {
         return mod.entries[pkg.main] as File
       }
     }
-    // Resolve with index
+    // Resolve with index, if exists
     if (mod.hasFile('index')) {
       return mod.entries['index.js'] as File
     }
@@ -141,6 +141,7 @@ export class Directory implements Dirent {
     this.entries = {}
   }
 
+  /** Adds one or more dirents to directory entries. */
   public add(...dirents: Dirent[]): this {
     for (const dirent of dirents) {
       dirent.parent = this
@@ -149,6 +150,9 @@ export class Directory implements Dirent {
     return this
   }
 
+  /** Removes dirent from directory entries.
+   * @param {Dirent} dName The dirent to remove. 
+   */
   public rm(dName: string): boolean {
     return delete this.entries[dName]
   }
@@ -179,6 +183,7 @@ export class File implements Dirent {
     this.Handler = Handler
   }
 
+  /** Initializes the request for a target file. */
   public request(target: string) {
     if (!this.parent) {
       return this.Handler.throwNotFound(target)
