@@ -31,27 +31,72 @@
  * and traversing elements.
  */
 interface Iterator {
-  first(): any
-  next(): any
-  isDone(): any
-  getCurrent(): any
+  first(): void            // positions iterator to first element
+  next(): void             // advances position
+  isDone(): boolean        // is all items iterated
+  getCursor(): number|void // returns item at current index
 }
-
 
 /**
  * **Concrete Iterator**
  * Implements the Iterator interface.
  * Keeps track of the current position
- * in the traversal of the aggregate.
+ * in the traversal of the aggregate (cursor/internal).
  * Can compute the suceeding object in the traversal.
+ * BST Iterator iterates its values in ascending order.
  */
-class ConcreteIterator implements Iterator {
-  first() { }
-  next() { }
-  isDone() { }
-  getCurrent() { }
+class BSTIterator implements Iterator {
+  private cursor: MaybeTreeNode
+  private stack: TreeNode[]
+
+  public constructor(private root: TreeNode) {
+    this.root = root
+    this.cursor = root
+    this.stack = []
+    this.traverseLeft(root)
+  }
+
+  public first() {
+    this.stack = []
+    this.traverseLeft(this.root)
+  }
+
+  public next() {
+    const next: MaybeTreeNode = this.stack.pop();
+    if (typeof next !== 'undefined') {
+      next.right && this.traverseLeft( next.right );
+      this.cursor = next
+    }
+  }
+
+  public isDone(): boolean {
+    return typeof this.cursor === 'undefined'
+  }
+
+  public getCursor(): number|void {
+    if (this.cursor) {
+      return this.cursor.val
+    }
+  }
+
+  private traverseLeft(node: MaybeTreeNode) {
+    while (node) {
+      this.stack.push(node)
+      node = node.left
+    }
+  }
 }
 
+/** Definition for BST node */
+class TreeNode {
+  public constructor(
+    public val: number,
+    public left?: TreeNode,
+    public right?: TreeNode, 
+  ) {}
+}
+
+type MaybeTreeNode = TreeNode|void
 
 /**
  * **Aggregate**
@@ -67,22 +112,94 @@ interface Aggregate {
  * Implements Iterator creation iterface to
  * return an instance of proper Concrete Iterator.
  */
-class ConcreteAggregate implements Aggregate {
-  private iterator: Iterator
+class BSTAggregate implements Aggregate {
+  private root: TreeNode
+  private Iter: typeof BSTIterator
+  public constructor(root: TreeNode, Iter: typeof BSTIterator) {
+    this.root = root
+    this.Iter = Iter
+  }
+  public createIterator(): BSTIterator {
+    return new this.Iter(this.root)
+  }
+}
 
-  public constructor(iterator: Iterator) {
-    this.iterator = iterator
+/**
+ * _Internal Iterator_
+ * Variations expose...
+ * Client could receive access to aggregate to make own traversers.
+ */
+interface Traverser {
+  traverse(): number[]
+}
+
+class BSTTraverser implements Traverser {
+  private bst: BSTAggregate
+  public constructor(root: TreeNode) {
+    this.bst = new BSTAggregate(root, BSTIterator)
   }
 
-  public createIterator() {
-    return new ConcreteIterator()
+  public traverse(): number[] {
+    const data: number[] = []
+    const iterator = this.bst.createIterator()
+
+    iterator.first()
+    while (!iterator.isDone()) {
+      const val = iterator.getCursor()
+      if (typeof val !== 'undefined') {
+        data.push(val)
+      }
+      iterator.next()
+    }
+
+    return data
   }
 }
 
 
 /**
 * **Client**
-* Interacts with Aggregate and Iterator interfaces.
+* Interacts with Aggregate (or aggregate wrapper like traverser),
+* and Iterator interfaces.
+* In this example, ...
 */
+/**
+ * Utility to build tree from values.
+ * NOTE: Not related to pattern.
+ */
+function buildTree(data: number[]): MaybeTreeNode {
+  const first = data.pop() // choose arbitrary starting value
+  if (typeof first !== 'number') return
+  let root = new TreeNode(first) // checked in
+  
+  const insert = (root: TreeNode, val: number) => {
+    while (root) {
+      if (root.val > val) {
+        if (root.left) {
+          root = root.left;  
+        } else {
+          root.left = new TreeNode(val);
+          break;
+        }
+      } else {
+        if (root.right) {
+          root = root.right;
+        } else {
+          root.right = new TreeNode(val);
+          break;
+        }
+      }
+    }
+  }
 
-export { }
+  data.forEach((val) => insert(root, val))
+  return root
+}
+
+function treeSort(data: number[]): number[]|void {
+  const root = buildTree(data)
+  if (root)
+  return new BSTTraverser(root).traverse() 
+}
+
+export { treeSort }
