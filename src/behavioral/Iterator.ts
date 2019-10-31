@@ -44,6 +44,9 @@ interface Iterator {
  * in the traversal of the aggregate (cursor/internal).
  * Can compute the suceeding object in the traversal.
  * BST Iterator iterates its values in ascending order.
+ * Separating the iteration allows us to change implementation,
+ * or clients to use alternate iterators.
+ * e.g We could do desc order traversal by traversing right first (postorder)
  */
 class BSTIterator implements Iterator {
   private cursor: MaybeTreeNode
@@ -54,25 +57,21 @@ class BSTIterator implements Iterator {
     this.cursor = root
     this.stack = []
     this.traverseLeft(root)
+    this.next()
   }
-
   public first() {
     this.stack = []
     this.traverseLeft(this.root)
+    this.next()
   }
-
   public next() {
     const next: MaybeTreeNode = this.stack.pop();
-    if (typeof next !== 'undefined') {
-      next.right && this.traverseLeft( next.right );
-      this.cursor = next
-    }
+    next && next.right && this.traverseLeft(next.right)
+    this.cursor = next 
   }
-
   public isDone(): boolean {
     return typeof this.cursor === 'undefined'
   }
-
   public getCursor(): number|void {
     if (this.cursor) {
       return this.cursor.val
@@ -101,6 +100,8 @@ type MaybeTreeNode = TreeNode|void
 /**
  * **Aggregate**
  * Defines interface for creating iterator object.
+ * Note aggregate/collection stores the data structure,
+ * though excluded from interface as structure is private.
  */
 interface Aggregate {
   createIterator(): Iterator
@@ -111,95 +112,54 @@ interface Aggregate {
  * **Concrete Aggregate**
  * Implements Iterator creation iterface to
  * return an instance of proper Concrete Iterator.
+ * Maintains a reference to its root node.
  */
-class BSTAggregate implements Aggregate {
+class BSTCollection implements Aggregate {
   private root: TreeNode
-  private Iter: typeof BSTIterator
-  public constructor(root: TreeNode, Iter: typeof BSTIterator) {
-    this.root = root
-    this.Iter = Iter
-  }
-  public createIterator(): BSTIterator {
-    return new this.Iter(this.root)
-  }
-}
+  private DefaultIterator = BSTIterator
 
-/**
- * _Internal Iterator_
- * Variations expose...
- * Client could receive access to aggregate to make own traversers.
- */
-interface Traverser {
-  traverse(): number[]
-}
-
-class BSTTraverser implements Traverser {
-  private bst: BSTAggregate
-  public constructor(root: TreeNode) {
-    this.bst = new BSTAggregate(root, BSTIterator)
-  }
-
-  public traverse(): number[] {
-    const data: number[] = []
-    const iterator = this.bst.createIterator()
-
-    iterator.first()
-    while (!iterator.isDone()) {
-      const val = iterator.getCursor()
-      if (typeof val !== 'undefined') {
-        data.push(val)
-      }
-      iterator.next()
+  public constructor(data: number[], CustomIterator?: typeof BSTIterator) {
+    this.root = this.buildTree(data)!
+    if (CustomIterator) {
+      this.DefaultIterator = CustomIterator
     }
+  }
 
-    return data
+  public createIterator(): BSTIterator {
+    return new this.DefaultIterator(this.root)
+  }
+
+  protected buildTree(data: number[]) {
+    data = data.slice().sort((a, b) => a - b) // don't modify input array 
+    const build = (left: number, right: number) => {
+      if (left > right) return
+      const mid = (left + right + 1) >> 1
+      const leftNode = build(left, mid-1) 
+      const root = new TreeNode(data[mid])
+      root.left = leftNode
+      root.right = build(mid+1, right)
+      return root
+    }
+    return build(0, data.length-1)
   }
 }
 
 
 /**
 * **Client**
-* Interacts with Aggregate (or aggregate wrapper like traverser),
+* Interacts with Aggregate (or aggregate wrapper if internal iterator),
 * and Iterator interfaces.
-* In this example, ...
+* In this example, client can create a BST Collection (aggregate),
+* create the iterator, and use the iterator interface to control traversal.
 */
-/**
- * Utility to build tree from values.
- * NOTE: Not related to pattern.
- */
-function buildTree(data: number[]): MaybeTreeNode {
-  const first = data.pop() // choose arbitrary starting value
-  if (typeof first !== 'number') return
-  let root = new TreeNode(first) // checked in
-  
-  const insert = (root: TreeNode, val: number) => {
-    while (root) {
-      if (root.val > val) {
-        if (root.left) {
-          root = root.left;  
-        } else {
-          root.left = new TreeNode(val);
-          break;
-        }
-      } else {
-        if (root.right) {
-          root = root.right;
-        } else {
-          root.right = new TreeNode(val);
-          break;
-        }
-      }
-    }
+function traverse(iter: Iterator) {
+  const data = []
+  iter.first()
+  while (!iter.isDone()) {
+    data.push(iter.getCursor())
+    iter.next()
   }
-
-  data.forEach((val) => insert(root, val))
-  return root
+  return data
 }
 
-function treeSort(data: number[]): number[]|void {
-  const root = buildTree(data)
-  if (root)
-  return new BSTTraverser(root).traverse() 
-}
-
-export { treeSort }
+export { BSTCollection, BSTIterator, traverse }
