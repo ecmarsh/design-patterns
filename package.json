@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ethan-marsh/design-patterns.git"
+    "url": "git+https://github.com/ecmarsh/design-patterns.git"
   },
   "keywords": [
     "oop",
