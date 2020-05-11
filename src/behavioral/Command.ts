@@ -200,11 +200,11 @@ class CalculatorApp {
   public equals(): number | string {
     try {
       this.invoker.executeCommand()
+      return this.display()
     } catch (e) {
       // Swallow
-    } finally {
-      return this.display()
     }
+    return this.display()
   }
 }
 
