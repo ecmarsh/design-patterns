@@ -34,30 +34,5 @@
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.5.3"
-  },
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended"
-    ],
-    "env": {
-      "node": true
-    },
-    "rules": {
-      "indent": "off",
-      "@typescript-eslint/indent": [
-        "error",
-        2
-      ],
-      "@typescript-eslint/member-delimiter-style": "off",
-      "@typescript-eslint/no-use-before-define": "off",
-      "@typescript-eslint/no-parameter-properties": "off",
-      "@typescript-eslint/explicit-function-return-type": "warn"
-    }
   }
 }
